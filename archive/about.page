@@ -1,0 +1,40 @@
+---
+title: Archive
+description: List all pages in the current folder filtered by time.
+author: Taufik Nurrohman
+type: Markdown
+version: 1.0.0
+
+use:
+  '.\lot\x\page': 1
+...
+
+This extension activates the time filter feature by utilizing the `time` property of the page to add several new routes such as `http://127.0.0.1/blog/archive/:date` on every page to allow users to list all pages in the current folder by time.
+
+As a note, every time you want to link a page to a specific year-based archive, be sure to always add the pagination offset to the end of the URL to prevent Mecha from mistakenly interpret the archive year as pagination offset:
+
+~~~ .txt
+http://127.0.0.1/blog/archive/2020 ✘
+http://127.0.0.1/blog/archive/2020/1 ✔
+~~~
+
+Other than that are safe enough, even though I would prefer you to add it anyway, for consistency:
+
+~~~ .txt
+http://127.0.0.1/blog/archive/2020-09/1
+http://127.0.0.1/blog/archive/2020-09-18/1
+~~~
+
+---
+
+### Conditions
+
+These page conditional statements are available:
+
+ - `$site->is('archives')` → Return `true` if current items view is an archives view and is not empty.
+
+### Classes
+
+These HTML classes will be added to the `<html>` element that has a `class` attribute:
+
+ - `is:archives` → Will be added if current items view is a archives view and is not empty.
