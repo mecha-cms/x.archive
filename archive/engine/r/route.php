@@ -62,7 +62,7 @@ function route($any, $date) {
                 'pages' => true,
                 'archive' => false, // Never be `true`
                 'archives' => true
-            ], 
+            ],
             'has' => [
                 'page' => true,
                 'pages' => $pages->count() > 0,
