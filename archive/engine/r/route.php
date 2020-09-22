@@ -31,8 +31,8 @@ function route($any, $date) {
     $/x', $date)) {
         $r = \LOT . \DS . 'page' . \DS . $any;
         if ($file = \File::exist([
-            $r . '.page',
-            $r . '.archive'
+            $r . '.archive',
+            $r . '.page'
         ])) {
             $page = new \Page($file);
         }
@@ -44,10 +44,14 @@ function route($any, $date) {
         $pages = \Pages::from($r, 'page', $deep)->sort($sort);
         if ($pages->count() > 0) {
             $pages->lot($pages->is(function($v) use($date) {
+                // Try from external data
                 if (\is_file($t = \Path::F($v) . \DS . 'time.data')) {
                     $t = \file_get_contents($t);
-                } else if (!$t = (\From::page(\file_get_contents($v), true)['time'] ?? null)) {
-                    return false;
+                // Try from internal data
+                } else if ($t = (\From::page(\file_get_contents($v), true)['time'] ?? null)) {
+                // Else, try from file name
+                } else {
+                    $t = \Path::B(\Path::F($v));
                 }
                 return 0 === \strpos(\strtr($t, [
                     ':' => '-',
