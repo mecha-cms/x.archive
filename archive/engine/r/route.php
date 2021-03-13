@@ -1,10 +1,10 @@
-<?php namespace _\lot\x\archive;
+<?php namespace x\archive;
 
 function route($any, $date) {
     extract($GLOBALS, \EXTR_SKIP);
     $date = (string) $date;
     $i = ($url['i'] ?? 1) - 1;
-    $path = \State::get('x.archive.path') ?? '/archive';
+    $path = $state->x->archive->path ?? '/archive';
     if (\is_numeric(\strtr($date, ['-' => ""])) && \preg_match('/^
       # year
       [1-9]\d{3,}
@@ -31,8 +31,8 @@ function route($any, $date) {
     $/x', $date)) {
         $r = \LOT . \DS . 'page' . \DS . $any;
         if ($file = \File::exist([
-            $r . '.page',
-            $r . '.archive'
+            $r . '.archive',
+            $r . '.page'
         ])) {
             $page = new \Page($file);
         }
@@ -120,4 +120,4 @@ function route($any, $date) {
     $this->layout('404/' . $any . $path . '/' . $date . '/' . ($i + 1));
 }
 
-\Route::set('*' . (\State::get('x.archive.path') ?? '/archive') . '/:date', 200, __NAMESPACE__ . "\\route", 10);
+\Route::set('*' . ($state->x->archive->path ?? '/archive') . '/:date', 200, __NAMESPACE__ . "\\route", 10);
