@@ -1,4 +1,4 @@
-<?php namespace _\lot\x\archive;
+<?php namespace x\archive;
 
 function route($any, $date) {
     extract($GLOBALS, \EXTR_SKIP);
@@ -6,22 +6,22 @@ function route($any, $date) {
     $i = ($url['i'] ?? 1) - 1;
     $path = \State::get('x.archive.path') ?? '/archive';
     if (\is_numeric(\strtr($date, ['-' => ""])) && \preg_match('/^
-      # year
+      # Year
       [1-9]\d{3,}
       (?:
-        # month
+        # Month
         -(0\d|1[0-2])
         (?:
-          # day
+          # Day
           -(0\d|[1-2]\d|3[0-1])
           (?:
-            # hour
+            # Hour
             -([0-1]\d|2[0-4])
             (?:
-              # minute
+              # Minute
               -([0-5]\d|60)
               (?:
-                # second
+                # Second
                 -([0-5]\d|60)
               )?
             )?
@@ -29,6 +29,15 @@ function route($any, $date) {
         )?
       )?
     $/x', $date)) {
+        $t = \array_slice(\array_replace([
+            '0000', // Year
+            '00', // Month
+            '00', // Day
+            '00', // Hour
+            '00', // Minute
+            '00' // Second
+        ], \explode('-', $date)), 0, 6);
+        $GLOBALS['archive'] = new \Time(\implode('-', $t));
         $r = \LOT . \DS . 'page' . \DS . $any;
         if ($file = \File::exist([
             $r . '.archive',
@@ -44,15 +53,8 @@ function route($any, $date) {
         $pages = \Pages::from($r, 'page', $deep)->sort($sort);
         if ($pages->count() > 0) {
             $pages->lot($pages->is(function($v) use($date) {
-                // Try from external data
-                if (\is_file($t = \Path::F($v) . \DS . 'time.data')) {
-                    $t = \file_get_contents($t);
-                // Try from internal data
-                } else if ($t = (\From::page(\file_get_contents($v), true)['time'] ?? null)) {
-                // Else, try from file name
-                } else {
-                    $t = \Path::B(\Path::F($v));
-                }
+                $page = new \Page($v);
+                $t = $page->time;
                 return 0 === \strpos(\strtr($t, [
                     ':' => '-',
                     ' ' => '-'
