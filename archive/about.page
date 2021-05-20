@@ -27,6 +27,10 @@ http://127.0.0.1/blog/archive/2020-09-18/1
 
 ---
 
+### Variables
+
+A global variable `$archive` will be available in archives page mode. This variable is an instance of the `Time` class which you can use to get the archive time portion from the URL.
+
 ### Conditions
 
 These page conditional statements are available:
