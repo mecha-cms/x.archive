@@ -1,5 +1,5 @@
-Archive Extension for Mecha
-===========================
+Archive Extension for [Mecha](https://github.com/mecha-cms/mecha)
+=================================================================
 
 Release Notes
 -------------
