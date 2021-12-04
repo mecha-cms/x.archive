@@ -1,16 +1,101 @@
-<?php
+<?php namespace x\archive;
 
-$chops = explode('/', $url->path);
-$archive = array_pop($chops);
-$prefix = array_pop($chops);
+function route($name, $path) {
+    extract($GLOBALS, \EXTR_SKIP);
+    if ($path && \preg_match('/^(.*?)\/([1-9]\d*)$/', $path, $m)) {
+        [$any, $path, $i] = $m;
+    }
+    $i = ($i ?? 1) - 1;
+    $folder = \LOT . \D . 'page' . \D . $path;
+    $route = \trim($state->x->archive->route ?? 'archive', '/');
+    if ($file = \exist([
+        $folder . '.archive',
+        $folder . '.page'
+    ], 1)) {
+        $page = new \Page($file);
+    }
+    \State::set([
+        'chunk' => $chunk = $page['chunk'] ?? 5,
+        'deep' => $deep = $page['deep'] ?? 0,
+        'sort' => $sort = [-1, 'time'] // Force page sort by the `time` data
+    ]);
+    $pages = \Pages::from($folder, 'page', $deep)->sort($sort);
+    if ($pages->count() > 0) {
+        $pages->lot($pages->is(function($v) use($name) {
+            $page = new \Page($v);
+            $t = $page->time . "";
+            return 0 === \strpos(\strtr($t, [
+                ':' => '-',
+                ' ' => '-'
+            ]) . '-', $name . '-');
+        })->get());
+    }
+    \State::set([
+        'is' => [
+            'error' => false,
+            'page' => false,
+            'pages' => true,
+            'archive' => false, // Never be `true`
+            'archives' => true
+        ],
+        'has' => [
+            'page' => true,
+            'pages' => $pages->count() > 0,
+            'parent' => true
+        ]
+    ]);
+    $GLOBALS['t'][] = \i('Archive');
+    $t = \explode('-', $name);
+    if (!isset($t[1])) {
+        $GLOBALS['t'][] = $t[0];
+    } else {
+        $GLOBALS['t'][] = (new \Time($t[0] . '-' . $t[1] . '-01 00:00:00'))('%B %Y');
+    }
+    $pager = new \Pager\Pages($pages->get(), [$chunk, $i], (object) [
+        'link' => $url . '/' . $path . '/' . $route . '/' . $name
+    ]);
+    // Set proper parent link
+    if (0 === $i) {
+        $pager->parent = $page;
+    }
+    $pages = $pages->chunk($chunk, $i);
+    $GLOBALS['page'] = $page;
+    $GLOBALS['pager'] = $pager;
+    $GLOBALS['pages'] = $pages;
+    $GLOBALS['parent'] = $page;
+    if (0 === $pages->count()) {
+        // Greater than the maximum step or less than `1`, abort!
+        \State::set([
+            'has' => [
+                'next' => false,
+                'parent' => false,
+                'prev' => false
+            ],
+            'is' => ['error' => 404]
+        ]);
+        $GLOBALS['t'][] = \i('Error');
+        \Hook::fire('layout', ['404/' . $path . '/' . $route . '/' . $name . '/' . ($i + 1)]);
+    }
+    \State::set('has', [
+        'next' => !!$pager->next,
+        'parent' => !!$pager->parent,
+        'prev' => !!$pager->prev
+    ]);
+    \Hook::fire('layout', ['pages/' . $path . '/' . $route . '/' . $name . '/' . ($i + 1)]);
+}
+
+$chops = \explode('/', $url->path);
+$i = \array_pop($chops);
+$archive = \array_pop($chops);
+$route = \array_pop($chops);
 
 $GLOBALS['archive'] = null;
 
 if (
     $archive &&
-    '/' . $prefix === ($state->x->archive->path ?? '/archive') &&
-    is_numeric(strtr($archive, ['-' => ""])) &&
-    preg_match('/^
+    $route === \trim($state->x->archive->route ?? 'archive', '/') &&
+    \is_numeric(\strtr($archive, ['-' => ""])) &&
+    \preg_match('/^
         # Year
         [1-9]\d{3,}
         (?:
@@ -35,7 +120,14 @@ if (
         )?
     $/x', $archive)
 ) {
-    $archive = substr_replace('1970-01-01-00-00-00', $archive, 0, strlen($archive));
-    $GLOBALS['archive'] = new Time($archive);
-    require __DIR__ . DS . 'engine' . DS . 'r' . DS . 'route.php';
+    $archive = \substr_replace('1970-01-01-00-00-00', $archive, 0, \strlen($archive));
+    $GLOBALS['archive'] = new \Time($archive);
+    \Hook::set('route.archive', __NAMESPACE__ . "\\route", 20);
+    \Hook::set('route.page', function($path, $query, $hash) use($route) {
+        if ($path && \preg_match('/^(.*?)\/' . \x($route) . '\/([^\/]+)\/([1-9]\d*)$/', $path, $m)) {
+            [$any, $path, $name, $i] = $m;
+            \State::set('is.error', false);
+            \Hook::fire('route.archive', [$name, $path . '/' . $i, $query, $hash]);
+        }
+    }, 10);
 }

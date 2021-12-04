@@ -1,3 +1,3 @@
 <?php
 
-return ['path' => '/archive'];
+return ['route' => '/archive'];
