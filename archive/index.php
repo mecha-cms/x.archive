@@ -52,7 +52,7 @@ function route($name, $path) {
         $GLOBALS['t'][] = (new \Time($t[0] . '-' . $t[1] . '-01 00:00:00'))('%B %Y');
     }
     $pager = new \Pager\Pages($pages->get(), [$chunk, $i], (object) [
-        'link' => $url . '/' . $path . '/' . $route . '/' . $name
+        'link' => $url . '/' . $path . '/' . $route . '/' . $name . (1 === $i ? '/' . $i : "")
     ]);
     // Set proper parent link
     if (0 === $i) {
