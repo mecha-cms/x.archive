@@ -1,13 +1,15 @@
 <?php namespace x\archive;
 
 function route($name, $path) {
+    \status(200);
     extract($GLOBALS, \EXTR_SKIP);
     if ($path && \preg_match('/^(.*?)\/([1-9]\d*)$/', $path, $m)) {
         [$any, $path, $i] = $m;
     }
     $i = ($i ?? 1) - 1;
-    $folder = \LOT . \D . 'page' . \D . $path;
+    $path = \trim($path ?? "", '/');
     $route = \trim($state->x->archive->route ?? 'archive', '/');
+    $folder = \LOT . \D . 'page' . \D . $path;
     if ($file = \exist([
         $folder . '.archive',
         $folder . '.page'
@@ -71,10 +73,15 @@ function route($name, $path) {
                 'parent' => false,
                 'prev' => false
             ],
-            'is' => ['error' => 404]
+            'is' => [
+                'error' => 404,
+                'page' => true,
+                'pages' => false
+            ]
         ]);
         $GLOBALS['t'][] = \i('Error');
-        \Hook::fire('layout', ['404/' . $path . '/' . $route . '/' . $name . '/' . ($i + 1)]);
+        \status(404);
+        \Hook::fire('layout', ['error/' . $path . '/' . $route . '/' . $name . '/' . ($i + 1)]);
     }
     \State::set('has', [
         'next' => !!$pager->next,
@@ -126,7 +133,6 @@ if (
     \Hook::set('route.page', function($path, $query, $hash) use($route) {
         if ($path && \preg_match('/^(.*?)\/' . \x($route) . '\/([^\/]+)\/([1-9]\d*)$/', $path, $m)) {
             [$any, $path, $name, $i] = $m;
-            \State::set('is.error', false);
             \Hook::fire('route.archive', [$name, $path . '/' . $i, $query, $hash]);
         }
     }, 10);
