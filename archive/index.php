@@ -54,12 +54,10 @@ function route($name, $path) {
         $GLOBALS['t'][] = (new \Time($t[0] . '-' . $t[1] . '-01 00:00:00'))('%B %Y');
     }
     $pager = new \Pager\Pages($pages->get(), [$chunk, $i], (object) [
-        'link' => $url . '/' . $path . '/' . $route . '/' . $name . (1 === $i ? '/' . $i : "")
+        'link' => $url . '/' . $path . '/' . $route . '/' . $name
     ]);
     // Set proper parent link
-    if (0 === $i) {
-        $pager->parent = $page;
-    }
+    $pager->parent = $page;
     $pages = $pages->chunk($chunk, $i);
     $GLOBALS['page'] = $page;
     $GLOBALS['pager'] = $pager;
