@@ -1,8 +1,7 @@
 <?php namespace x\archive;
 
 function route($name, $path) {
-    \status(200);
-    extract($GLOBALS, \EXTR_SKIP);
+    \extract($GLOBALS, \EXTR_SKIP);
     if ($path && \preg_match('/^(.*?)\/([1-9]\d*)$/', $path, $m)) {
         [$any, $path, $i] = $m;
     }
@@ -86,6 +85,7 @@ function route($name, $path) {
         'parent' => !!$pager->parent,
         'prev' => !!$pager->prev
     ]);
+    \status(200);
     \Hook::fire('layout', ['pages/' . $path . '/' . $route . '/' . $name . '/' . ($i + 1)]);
 }
 
