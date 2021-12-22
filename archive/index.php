@@ -127,11 +127,11 @@ if (
 ) {
     $archive = \substr_replace('1970-01-01-00-00-00', $archive, 0, \strlen($archive));
     $GLOBALS['archive'] = new \Time($archive);
-    \Hook::set('route.archive', __NAMESPACE__ . "\\route", 20);
+    \Hook::set('route.archive', __NAMESPACE__ . "\\route", 100);
     \Hook::set('route.page', function($path, $query, $hash) use($route) {
         if ($path && \preg_match('/^(.*?)\/' . \x($route) . '\/([^\/]+)\/([1-9]\d*)$/', $path, $m)) {
             [$any, $path, $name, $i] = $m;
             \Hook::fire('route.archive', [$name, $path . '/' . $i, $query, $hash]);
         }
-    }, 10);
+    }, 90);
 }
