@@ -56,7 +56,7 @@ function route($name, $path) {
         'link' => $url . '/' . $path . '/' . $route . '/' . $name
     ]);
     // Set proper parent link
-    $pager->parent = $page;
+    $pager->parent = $i > 0 ? (object) ['link' => $url . '/' . $path . '/' . $route . '/' . $name . '/1'] : $page;
     $pages = $pages->chunk($chunk, $i);
     $GLOBALS['page'] = $page;
     $GLOBALS['pager'] = $pager;
