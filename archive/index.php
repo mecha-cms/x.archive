@@ -1,11 +1,15 @@
 <?php namespace x\archive;
 
-function route($name, $path) {
+function route($data, $path) {
+    if (isset($data['content']) || isset($data['kick'])) {
+        return $data;
+    }
     \extract($GLOBALS, \EXTR_SKIP);
+    $name = $data['name'];
     if ($path && \preg_match('/^(.*?)\/([1-9]\d*)$/', $path, $m)) {
         [$any, $path, $i] = $m;
     }
-    $i = ($i ?? 1) - 1;
+    $i = ((int) ($i ?? 1)) - 1;
     $path = \trim($path ?? "", '/');
     $route = \trim($state->x->archive->route ?? 'archive', '/');
     $folder = \LOT . \D . 'page' . \D . $path;
@@ -77,16 +81,18 @@ function route($name, $path) {
             ]
         ]);
         $GLOBALS['t'][] = \i('Error');
-        \status(404);
-        \Hook::fire('layout', ['error/' . $path . '/' . $route . '/' . $name . '/' . ($i + 1)]);
+        $data['content'] = \Hook::fire('layout', ['error/' . $path . '/' . $route . '/' . $name . '/' . ($i + 1)]);
+        $data['status'] = 404;
+        return $data;
     }
     \State::set('has', [
         'next' => !!$pager->next,
         'parent' => !!$pager->parent,
         'prev' => !!$pager->prev
     ]);
-    \status(200);
-    \Hook::fire('layout', ['pages/' . $path . '/' . $route . '/' . $name . '/' . ($i + 1)]);
+    $data['content'] = \Hook::fire('layout', ['pages/' . $path . '/' . $route . '/' . $name . '/' . ($i + 1)]);
+    $data['status'] = 200;
+    return $data;
 }
 
 $chops = \explode('/', $url->path);
@@ -128,10 +134,12 @@ if (
     $archive = \substr_replace('1970-01-01-00-00-00', $archive, 0, \strlen($archive));
     $GLOBALS['archive'] = new \Time($archive);
     \Hook::set('route.archive', __NAMESPACE__ . "\\route", 100);
-    \Hook::set('route.page', function($path, $query, $hash) use($route) {
+    \Hook::set('route.page', function($data, $path, $query, $hash) use($route) {
         if ($path && \preg_match('/^(.*?)\/' . \x($route) . '\/([^\/]+)\/([1-9]\d*)$/', $path, $m)) {
             [$any, $path, $name, $i] = $m;
-            \Hook::fire('route.archive', [$name, $path . '/' . $i, $query, $hash]);
+            $data['name'] = $name;
+            return \Hook::fire('route.archive', [$data, $path . '/' . $i, $query, $hash]);
         }
+        return $data;
     }, 90);
 }
