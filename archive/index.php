@@ -95,7 +95,7 @@ function route($r, $path) {
     return $r;
 }
 
-$chops = \explode('/', $url->path);
+$chops = \explode('/', $url->path ?? "");
 $i = \array_pop($chops);
 $archive = \array_pop($chops);
 $route = \array_pop($chops);
