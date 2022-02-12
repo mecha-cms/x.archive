@@ -1,8 +1,8 @@
 <?php namespace x\archive;
 
-function route($r, $path) {
-    if (isset($r['content']) || isset($r['kick']) || isset($r['layout']) || isset($r['path'])) {
-        return $r;
+function route($content, $path, $query, $hash, $r) {
+    if (null !== $content) {
+        return $content;
     }
     \extract($GLOBALS, \EXTR_SKIP);
     $name = $r['name'];
@@ -81,18 +81,14 @@ function route($r, $path) {
             ]
         ]);
         $GLOBALS['t'][] = \i('Error');
-        $r['layout'] = 'error/' . $path . '/' . $route . '/' . $name . '/' . ($i + 1);
-        $r['status'] = 404;
-        return $r;
+        return \Layout::error($path . '/' . $route . '/' . $name . '/' . ($i + 1), [], 404);
     }
     \State::set('has', [
         'next' => !!$pager->next,
         'parent' => !!$pager->parent,
         'prev' => !!$pager->prev
     ]);
-    $r['layout'] = 'pages/' . $path . '/' . $route . '/' . $name . '/' . ($i + 1);
-    $r['status'] = 200;
-    return $r;
+    return \Layout::pages($path . '/' . $route . '/' . $name . '/' . ($i + 1), [], 200);
 }
 
 $chops = \explode('/', $url->path ?? "");
@@ -134,12 +130,12 @@ if (
     $archive = \substr_replace('1970-01-01-00-00-00', $archive, 0, \strlen($archive));
     $GLOBALS['archive'] = new \Time($archive);
     \Hook::set('route.archive', __NAMESPACE__ . "\\route", 100);
-    \Hook::set('route.page', function($r, $path, $query, $hash) use($route) {
+    \Hook::set('route.page', function($content, $path, $query, $hash) use($route) {
         if ($path && \preg_match('/^(.*?)\/' . \x($route) . '\/([^\/]+)\/([1-9]\d*)$/', $path, $m)) {
             [$any, $path, $name, $i] = $m;
             $r['name'] = $name;
-            return \Hook::fire('route.archive', [$r, $path . '/' . $i, $query, $hash]);
+            return \Hook::fire('route.archive', [$content, $any, $query, $hash, $r]);
         }
-        return $r;
+        return $content;
     }, 90);
 }
