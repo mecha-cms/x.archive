@@ -1,7 +1,7 @@
 <?php namespace x\archive;
 
 function route($r, $path) {
-    if (isset($r['content']) || isset($r['kick'])) {
+    if (isset($r['content']) || isset($r['kick']) || isset($r['layout']) || isset($r['path'])) {
         return $r;
     }
     \extract($GLOBALS, \EXTR_SKIP);
@@ -81,7 +81,7 @@ function route($r, $path) {
             ]
         ]);
         $GLOBALS['t'][] = \i('Error');
-        $r['content'] = \Hook::fire('layout', ['error/' . $path . '/' . $route . '/' . $name . '/' . ($i + 1)]);
+        $r['layout'] = 'error/' . $path . '/' . $route . '/' . $name . '/' . ($i + 1);
         $r['status'] = 404;
         return $r;
     }
@@ -90,7 +90,7 @@ function route($r, $path) {
         'parent' => !!$pager->parent,
         'prev' => !!$pager->prev
     ]);
-    $r['content'] = \Hook::fire('layout', ['pages/' . $path . '/' . $route . '/' . $name . '/' . ($i + 1)]);
+    $r['layout'] = 'pages/' . $path . '/' . $route . '/' . $name . '/' . ($i + 1);
     $r['status'] = 200;
     return $r;
 }
