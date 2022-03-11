@@ -26,7 +26,7 @@ function route($content, $path, $query, $hash, $r) {
     ]);
     $pages = \Pages::from($folder, 'page', $deep)->sort($sort);
     if ($pages->count() > 0) {
-        $pages->lot($pages->is(function($v) use($name) {
+        $pages->lot($pages->is(static function($v) use($name) {
             $page = new \Page($v);
             $t = $page->time . "";
             return 0 === \strpos(\strtr($t, [
@@ -134,7 +134,7 @@ if (
         if ($path && \preg_match('/^(.*?)\/' . \x($route) . '\/([^\/]+)\/([1-9]\d*)$/', $path, $m)) {
             [$any, $path, $name, $i] = $m;
             $r['name'] = $name;
-            return \Hook::fire('route.archive', [$content, $any, $query, $hash, $r]);
+            return \Hook::fire('route.archive', [$content, $path, $query, $hash, $r]);
         }
         return $content;
     }, 90);
