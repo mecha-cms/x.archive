@@ -81,14 +81,14 @@ function route($content, $path, $query, $hash, $r) {
             ]
         ]);
         $GLOBALS['t'][] = \i('Error');
-        return \Layout::error($path . '/' . $route . '/' . $name . '/' . ($i + 1), [], 404);
+        return ['error', [], 404];
     }
     \State::set('has', [
         'next' => !!$pager->next,
         'parent' => !!$pager->parent,
         'prev' => !!$pager->prev
     ]);
-    return \Layout::pages($path . '/' . $route . '/' . $name . '/' . ($i + 1), [], 200);
+    return ['pages', [], 200];
 }
 
 $chops = \explode('/', $url->path ?? "");
