@@ -81,11 +81,12 @@ function route($content, $path, $query, $hash, $r) {
             ]
         ]);
         $GLOBALS['t'][] = \i('Error');
-        return ['error', [], 404];
+        return ['page', [], 404];
     }
     \State::set('has', [
         'next' => !!$pager->next,
         'parent' => !!$pager->parent,
+        'part' => $i + 1,
         'prev' => !!$pager->prev
     ]);
     return ['pages', [], 200];
