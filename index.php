@@ -135,7 +135,7 @@ if (
         if ($path && \preg_match('/^(.*?)\/' . \x($route) . '\/([^\/]+)\/([1-9]\d*)$/', $path, $m)) {
             [$any, $path, $name, $i] = $m;
             $r['name'] = $name;
-            return \Hook::fire('route.archive', [$content, $path, $query, $hash, $r]);
+            return \Hook::fire('route.archive', [$content, $path . '/' . $i, $query, $hash, $r]);
         }
         return $content;
     }, 90);
