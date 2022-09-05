@@ -132,6 +132,7 @@ if (
     $GLOBALS['archive'] = new \Time($archive);
     \Hook::set('route.archive', __NAMESPACE__ . "\\route", 100);
     \Hook::set('route.page', function($content, $path, $query, $hash) use($route) {
+        // Return the route value to the native page route and move the archive route parameter to `name`
         if ($path && \preg_match('/^(.*?)\/' . \x($route) . '\/([^\/]+)\/([1-9]\d*)$/', $path, $m)) {
             [$any, $path, $name, $i] = $m;
             $r['name'] = $name;
