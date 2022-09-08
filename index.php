@@ -26,7 +26,7 @@ function route($content, $path, $query, $hash, $r) {
     ]);
     $pages = \Pages::from($folder, 'page', $deep)->sort($sort);
     if ($pages->count() > 0) {
-        $pages->lot($pages->is(static function($v) use($name) {
+        $pages->lot($pages->is(static function ($v) use ($name) {
             $page = new \Page($v);
             $t = $page->time . "";
             return 0 === \strpos(\strtr($t, [
@@ -131,7 +131,7 @@ if (
     $archive = \substr_replace('1970-01-01-00-00-00', $archive, 0, \strlen($archive));
     $GLOBALS['archive'] = new \Time($archive);
     \Hook::set('route.archive', __NAMESPACE__ . "\\route", 100);
-    \Hook::set('route.page', function($content, $path, $query, $hash) use($route) {
+    \Hook::set('route.page', function ($content, $path, $query, $hash) use ($route) {
         // Return the route value to the native page route and move the archive route parameter to `name`
         if ($path && \preg_match('/^(.*?)\/' . \x($route) . '\/([^\/]+)\/([1-9]\d*)$/', $path, $m)) {
             [$any, $path, $name, $i] = $m;
