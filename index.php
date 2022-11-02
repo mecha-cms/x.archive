@@ -7,9 +7,9 @@ function route($content, $path, $query, $hash, $r) {
     \extract($GLOBALS, \EXTR_SKIP);
     $name = $r['name'];
     if ($path && \preg_match('/^(.*?)\/([1-9]\d*)$/', $path, $m)) {
-        [$any, $path, $i] = $m;
+        [$any, $path, $part] = $m;
     }
-    $i = ((int) ($i ?? 1)) - 1;
+    $part = ((int) ($part ?? 1)) - 1;
     $path = \trim($path ?? "", '/');
     $route = \trim($state->x->archive->route ?? 'archive', '/');
     $folder = \LOT . \D . 'page' . \D . $path;
@@ -26,15 +26,16 @@ function route($content, $path, $query, $hash, $r) {
     ]);
     $pages = \Pages::from($folder, 'page', $deep)->sort($sort);
     if ($pages->count() > 0) {
-        $pages->lot($pages->is(static function ($v) use ($name) {
+        $pages = $pages->is(static function ($v) use ($name) {
             $page = new \Page($v);
             $t = $page->time . "";
             return 0 === \strpos(\strtr($t, [
                 ':' => '-',
                 ' ' => '-'
             ]) . '-', $name . '-');
-        })->get());
+        });
     }
+    $pages = $pages->chunk($chunk, $part);
     \State::set([
         'is' => [
             'error' => false,
@@ -56,12 +57,10 @@ function route($content, $path, $query, $hash, $r) {
     } else {
         $GLOBALS['t'][] = (new \Time($t[0] . '-' . $t[1] . '-01 00:00:00'))('%B %Y');
     }
-    $pager = new \Pager\Pages($pages->get(), [$chunk, $i], (object) [
-        'link' => $url . '/' . $path . '/' . $route . '/' . $name
+    $pager = new \Pager\Archive($folder, [
+        'part' => $part + 1,
+        'route' => $path . '/' . $route . '/' . $name
     ]);
-    // Set proper parent link
-    $pager->parent = $i > 0 ? (object) ['link' => $url . '/' . $path . '/' . $route . '/' . $name . '/1'] : $page;
-    $pages = $pages->chunk($chunk, $i);
     $GLOBALS['page'] = $page;
     $GLOBALS['pager'] = $pager;
     $GLOBALS['pages'] = $pages;
@@ -86,14 +85,14 @@ function route($content, $path, $query, $hash, $r) {
     \State::set('has', [
         'next' => !!$pager->next,
         'parent' => !!$pager->parent,
-        'part' => $i + 1,
+        'part' => !!($part + 1),
         'prev' => !!$pager->prev
     ]);
     return ['pages', [], 200];
 }
 
 $chops = \explode('/', $url->path ?? "");
-$i = \array_pop($chops);
+$part = \array_pop($chops);
 $archive = \array_pop($chops);
 $route = \array_pop($chops);
 
@@ -134,9 +133,9 @@ if (
     \Hook::set('route.page', function ($content, $path, $query, $hash) use ($route) {
         // Return the route value to the native page route and move the archive route parameter to `name`
         if ($path && \preg_match('/^(.*?)\/' . \x($route) . '\/([^\/]+)\/([1-9]\d*)$/', $path, $m)) {
-            [$any, $path, $name, $i] = $m;
+            [$any, $path, $name, $part] = $m;
             $r['name'] = $name;
-            return \Hook::fire('route.archive', [$content, $path . '/' . $i, $query, $hash, $r]);
+            return \Hook::fire('route.archive', [$content, $path . '/' . $part, $query, $hash, $r]);
         }
         return $content;
     }, 90);
