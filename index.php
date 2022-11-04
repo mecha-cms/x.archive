@@ -35,6 +35,9 @@ function route($content, $path, $query, $hash, $r) {
             ]) . '-', $name . '-');
         });
     }
+    $pager = new \Pager($pages);
+    $pager->path = $path . '/' . $route . '/' . $name;
+    $pager = $pager->chunk($chunk, $part + 1);
     $pages = $pages->chunk($chunk, $part);
     \State::set([
         'is' => [
@@ -57,10 +60,6 @@ function route($content, $path, $query, $hash, $r) {
     } else {
         $GLOBALS['t'][] = (new \Time($t[0] . '-' . $t[1] . '-01 00:00:00'))('%B %Y');
     }
-    $pager = new \Pager\Archive($folder, [
-        'part' => $part + 1,
-        'route' => $path . '/' . $route . '/' . $name
-    ]);
     $GLOBALS['page'] = $page;
     $GLOBALS['pager'] = $pager;
     $GLOBALS['pages'] = $pages;
