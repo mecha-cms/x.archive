@@ -1,11 +1,11 @@
 <?php namespace x\archive;
 
-function route($content, $path, $query, $hash, $r) {
+function route($content, $path, $query, $hash) {
     if (null !== $content) {
         return $content;
     }
     \extract($GLOBALS, \EXTR_SKIP);
-    $name = $r['name'];
+    $name = \From::query($query)['name'] ?? "";
     if ($path && \preg_match('/^(.*?)\/([1-9]\d*)$/', $path, $m)) {
         [$any, $path, $part] = $m;
     }
@@ -133,8 +133,8 @@ if (
         // Return the route value to the native page route and move the archive route parameter to `name`
         if ($path && \preg_match('/^(.*?)\/' . \x($route) . '\/([^\/]+)\/([1-9]\d*)$/', $path, $m)) {
             [$any, $path, $name, $part] = $m;
-            $r['name'] = $name;
-            return \Hook::fire('route.archive', [$content, $path . '/' . $part, $query, $hash, $r]);
+            $query = \To::query(\array_replace(\From::query($query), ['name' => $name]));
+            return \Hook::fire('route.archive', [$content, $path . '/' . $part, $query, $hash]);
         }
         return $content;
     }, 90);
