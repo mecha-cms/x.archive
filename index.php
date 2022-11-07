@@ -37,7 +37,7 @@ function route($content, $path, $query, $hash) {
     }
     $pager = \Pager::from($pages);
     $pager->path = $path . '/' . $route . '/' . $name;
-    $pager = $pager->chunk($chunk, $part + 1);
+    $pager = $pager->chunk($chunk, $part);
     $pages = $pages->chunk($chunk, $part);
     \State::set([
         'is' => [
