@@ -26,7 +26,7 @@ function route($content, $path, $query, $hash) {
     ]);
     $pages = \Pages::from($folder, 'page', $deep)->sort($sort);
     if ($pages->count() > 0) {
-        $pages = $pages->is(static function ($v) use ($name) {
+        $pages = $pages->is(function ($v) use ($name) {
             $page = new \Page($v);
             $t = $page->time . "";
             return 0 === \strpos(\strtr($t, [
