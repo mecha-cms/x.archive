@@ -22,6 +22,7 @@ function route($content, $path, $query, $hash) {
     \State::set([
         'chunk' => $chunk = $page['chunk'] ?? 5,
         'deep' => $deep = $page['deep'] ?? 0,
+        'part' => $part + 1,
         'sort' => $sort = [-1, 'time'] // Force page sort by the `time` data
     ]);
     $pages = \Pages::from($folder, 'page', $deep)->sort($sort);
