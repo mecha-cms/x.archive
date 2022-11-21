@@ -19,76 +19,78 @@ function route($content, $path, $query, $hash) {
     ], 1)) {
         $page = new \Page($file);
     }
-    \State::set([
-        'chunk' => $chunk = $page['chunk'] ?? 5,
-        'deep' => $deep = $page['deep'] ?? 0,
-        'part' => $part + 1,
-        'sort' => $sort = [-1, 'time'] // Force page sort by the `time` data
-    ]);
+    $chunk = $page->chunk ?? 5;
+    $deep = $page->deep ?? 0;
+    $sort = [-1, 'time']; // Force page sort by the `time` data
     $pages = \Pages::from($folder, 'page', $deep)->sort($sort);
-    if ($pages->count() > 0) {
+    \State::set([
+        'chunk' => $chunk,
+        'count' => $count = $pages->count,
+        'deep' => $deep,
+        'part' => $part + 1,
+        'sort' => $sort
+    ]);
+    if ($count > 0) {
         $pages = $pages->is(function ($v) use ($name) {
-            $page = new \Page($v);
-            $t = $page->time . "";
-            return 0 === \strpos(\strtr($t, [
+            $time = $v->time . "";
+            return 0 === \strpos(\strtr($time, [
                 ':' => '-',
                 ' ' => '-'
             ]) . '-', $name . '-');
         });
-    }
-    $pager = \Pager::from($pages);
-    $pager->path = $path . '/' . $route . '/' . $name;
-    $pager = $pager->chunk($chunk, $part);
-    $pages = $pages->chunk($chunk, $part);
-    \State::set([
-        'is' => [
-            'error' => false,
-            'page' => false,
-            'pages' => true,
-            'archive' => false, // Never be `true`
-            'archives' => true
-        ],
-        'has' => [
-            'page' => true,
-            'pages' => $pages->count() > 0,
-            'parent' => true
-        ]
-    ]);
-    $GLOBALS['t'][] = \i('Archive');
-    $t = \explode('-', $name);
-    if (!isset($t[1])) {
-        $GLOBALS['t'][] = $t[0];
-    } else {
-        $GLOBALS['t'][] = (new \Time($t[0] . '-' . $t[1] . '-01 00:00:00'))('%B %Y');
-    }
-    $GLOBALS['page'] = $page;
-    $GLOBALS['pager'] = $pager;
-    $GLOBALS['pages'] = $pages;
-    $GLOBALS['parent'] = $page;
-    if (0 === $pages->count()) {
-        // Greater than the maximum step or less than `1`, abort!
+        $pager = \Pager::from($pages);
+        $pager->path = $path . '/' . $route . '/' . $name;
+        $pager = $pager->chunk($chunk, $part);
+        $pages = $pages->chunk($chunk, $part);
+        if (0 === $pages->count) {
+            // Greater than the maximum part or less than `1`, abort!
+            \State::set([
+                'has' => [
+                    'next' => false,
+                    'parent' => false,
+                    'prev' => false
+                ],
+                'is' => [
+                    'error' => 404,
+                    'page' => true,
+                    'pages' => false
+                ]
+            ]);
+            $GLOBALS['t'][] = \i('Error');
+            return ['page', [], 404];
+        }
         \State::set([
-            'has' => [
-                'next' => false,
-                'parent' => false,
-                'prev' => false
-            ],
             'is' => [
-                'error' => 404,
+                'error' => false,
+                'page' => false,
+                'pages' => true,
+                'archive' => false, // Never be `true`
+                'archives' => true
+            ],
+            'has' => [
                 'page' => true,
-                'pages' => false
+                'pages' => $pages->count() > 0,
+                'parent' => true
             ]
         ]);
-        $GLOBALS['t'][] = \i('Error');
-        return ['page', [], 404];
+        $GLOBALS['t'][] = \i('Archive');
+        $t = \explode('-', $name);
+        if (!isset($t[1])) {
+            $GLOBALS['t'][] = $t[0];
+        } else {
+            $GLOBALS['t'][] = (new \Time($t[0] . '-' . $t[1] . '-01 00:00:00'))('%B %Y');
+        }
+        $GLOBALS['page'] = $page;
+        $GLOBALS['pager'] = $pager;
+        $GLOBALS['pages'] = $pages;
+        \State::set('has', [
+            'next' => !!$pager->next,
+            'parent' => !!$pager->parent,
+            'part' => !!($part + 1),
+            'prev' => !!$pager->prev
+        ]);
+        return ['pages', [], 200];
     }
-    \State::set('has', [
-        'next' => !!$pager->next,
-        'parent' => !!$pager->parent,
-        'part' => !!($part + 1),
-        'prev' => !!$pager->prev
-    ]);
-    return ['pages', [], 200];
 }
 
 $chops = \explode('/', $url->path ?? "");
