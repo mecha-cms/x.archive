@@ -25,7 +25,7 @@ function route($content, $path, $query, $hash) {
     $pages = \Pages::from($folder, 'page', $deep)->sort($sort);
     \State::set([
         'chunk' => $chunk,
-        'count' => $count = $pages->count,
+        'count' => $count = $pages->count, // Total number of page(s)
         'deep' => $deep,
         'part' => $part + 1,
         'sort' => $sort
@@ -42,7 +42,8 @@ function route($content, $path, $query, $hash) {
         $pager->path = $path . '/' . $route . '/' . $name;
         $pager = $pager->chunk($chunk, $part);
         $pages = $pages->chunk($chunk, $part);
-        if (0 === $pages->count) {
+        $count = $pages->count; // Total number of page(s) after chunk
+        if (0 === $count) {
             // Greater than the maximum part or less than `1`, abort!
             \State::set([
                 'has' => [
@@ -69,7 +70,7 @@ function route($content, $path, $query, $hash) {
             ],
             'has' => [
                 'page' => true,
-                'pages' => $pages->count() > 0,
+                'pages' => $count > 0,
                 'parent' => true
             ]
         ]);
