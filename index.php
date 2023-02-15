@@ -62,11 +62,11 @@ function route($content, $path, $query, $hash) {
         }
         \State::set([
             'is' => [
+                'archive' => false, // Never be `true`
+                'archives' => true,
                 'error' => false,
                 'page' => false,
-                'pages' => true,
-                'archive' => false, // Never be `true`
-                'archives' => true
+                'pages' => true
             ],
             'has' => [
                 'page' => true,
