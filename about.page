@@ -6,9 +6,6 @@ color: '#617110'
 author: Taufik Nurrohman
 type: Markdown
 version: 2.0.0
-
-use:
-  '.\lot\x\page': 1
 ...
 
 This extension activates the time filter feature by utilizing the `time` property of the page to add several routes such
