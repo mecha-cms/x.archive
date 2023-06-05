@@ -1,6 +1,6 @@
 <?php namespace x\archive;
 
-function route($content, $path, $query, $hash) {
+function route__archive($content, $path, $query, $hash) {
     if (null !== $content) {
         return $content;
     }
@@ -94,6 +94,21 @@ function route($content, $path, $query, $hash) {
     }
 }
 
+function route__page($content, $path, $query, $hash) {
+    if (null !== $content) {
+        return $content;
+    }
+    \extract($GLOBALS, \EXTR_SKIP);
+    $route = \trim($state->x->archive->route ?? 'archive', '/');
+    // Return the route value to the native page route and move the archive route parameter to `name`
+    if ($path && \preg_match('/^(.*?)\/' . \x($route) . '\/([^\/]+)\/([1-9]\d*)$/', $path, $m)) {
+        [$any, $path, $name, $part] = $m;
+        $query = \To::query(\array_replace(\From::query($query), ['name' => $name]));
+        return \Hook::fire('route.archive', [$content, $path . '/' . $part, $query, $hash]);
+    }
+    return $content;
+}
+
 $chops = \explode('/', $url->path ?? "");
 $part = \array_pop($chops);
 $archive = \array_pop($chops);
@@ -132,14 +147,6 @@ if (
 ) {
     $archive = \substr_replace('1970-01-01-00-00-00', $archive, 0, \strlen($archive));
     $GLOBALS['archive'] = new \Time($archive);
-    \Hook::set('route.archive', __NAMESPACE__ . "\\route", 100);
-    \Hook::set('route.page', function ($content, $path, $query, $hash) use ($route) {
-        // Return the route value to the native page route and move the archive route parameter to `name`
-        if ($path && \preg_match('/^(.*?)\/' . \x($route) . '\/([^\/]+)\/([1-9]\d*)$/', $path, $m)) {
-            [$any, $path, $name, $part] = $m;
-            $query = \To::query(\array_replace(\From::query($query), ['name' => $name]));
-            return \Hook::fire('route.archive', [$content, $path . '/' . $part, $query, $hash]);
-        }
-        return $content;
-    }, 90);
+    \Hook::set('route.archive', __NAMESPACE__ . "\\route__archive", 100);
+    \Hook::set('route.page', __NAMESPACE__ . "\\route__page", 90);
 }
