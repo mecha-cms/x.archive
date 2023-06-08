@@ -31,7 +31,7 @@ page. You can use this feature to to create a specific look or response on your 
 following classes are found in the root element:
 
 `is:archives`
-: Will be added if current items view is an archives view and is not empty.
+: Will be added if the current items view is an archives view and is not empty.
 
 Example usage in CSS code:
 
@@ -69,7 +69,7 @@ These additional variables are available for use in layouts that carry data rela
 page:
 
 `$archive`
-: This variable is an instance of the `Time` class which you can use to get the archive time portion from the URL.
+: This variable is an instance of the `Time` class, which you can use to get the archive time portion of the URL.
 
 Example usage in HTML/PHP code:
 
