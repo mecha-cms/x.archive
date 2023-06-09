@@ -27,8 +27,8 @@ http://127.0.0.1/blog/archive/2020-09-18/1 ✔
 ### Usage
 
 These HTML classes will be added to the root element if it contains a `class` attribute when you are on the archives
-page. You can use this feature to to create a specific look or response on your site from the client side if the
-following classes are found in the root element:
+page. You can use this feature to create a specific look or response on your site from the client side if the following
+classes are found in the root element:
 
 `is:archives`
 : Will be added if the current items view is an archives view and is not empty.
@@ -53,7 +53,7 @@ These additional conditional statements are available for use in layouts to show
 server side:
 
 `$site->is('archives')`
-: Returns `true` if the current item view is an archives view and is not empty.
+: Returns `true` if the current items view is an archives view and is not empty.
 
 Example usage in HTML/PHP code:
 
@@ -65,7 +65,7 @@ Example usage in HTML/PHP code:
 <?php endif; ?>
 ~~~
 
-These additional variables are available for use in layouts that carry data related to the currently active archive
+These additional variables are available for use in layouts that carry data related to the currently active archives
 page:
 
 `$archive`

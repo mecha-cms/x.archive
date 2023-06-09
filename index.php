@@ -114,6 +114,7 @@ $part = \array_pop($chops);
 $archive = \array_pop($chops);
 $route = \array_pop($chops);
 
+// Initialize response variable(s)
 $GLOBALS['archive'] = null;
 
 if (
