@@ -5,7 +5,7 @@ icon: 'M7 11H9V13H7V11M21 5V19C21 20.11 20.11 21 19 21H5C3.89 21 3 20.1 3 19V5C3
 color: '#617110'
 author: Taufik Nurrohman
 type: Markdown
-version: 2.0.0
+version: 2.0.1
 ...
 
 This extension enables the time filter feature by using the page’s `time` property to add multiple routes, such as

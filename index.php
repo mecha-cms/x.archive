@@ -4,7 +4,7 @@ function route__archive($content, $path, $query, $hash) {
     if (null !== $content) {
         return $content;
     }
-    \extract($GLOBALS, \EXTR_SKIP);
+    \extract(\lot(), \EXTR_SKIP);
     $name = \From::query($query)['name'] ?? "";
     if ($path && \preg_match('/^(.*?)\/([1-9]\d*)$/', $path, $m)) {
         [$any, $path, $part] = $m;
@@ -57,7 +57,7 @@ function route__archive($content, $path, $query, $hash) {
                     'pages' => false
                 ]
             ]);
-            $GLOBALS['t'][] = \i('Error');
+            \lot('t')[] = \i('Error');
             return ['page', [], 404];
         }
         \State::set([
@@ -74,16 +74,16 @@ function route__archive($content, $path, $query, $hash) {
                 'parent' => true
             ]
         ]);
-        $GLOBALS['t'][] = \i('Archive');
+        \lot('t')[] = \i('Archive');
         $t = \explode('-', $name);
         if (!isset($t[1])) {
-            $GLOBALS['t'][] = $t[0];
+            \lot('t')[] = $t[0];
         } else {
-            $GLOBALS['t'][] = (new \Time($t[0] . '-' . $t[1] . '-01 00:00:00'))('%B %Y');
+            \lot('t')[] = (new \Time($t[0] . '-' . $t[1] . '-01 00:00:00'))('%B %Y');
         }
-        $GLOBALS['page'] = $page;
-        $GLOBALS['pager'] = $pager;
-        $GLOBALS['pages'] = $pages;
+        \lot('page', $page);
+        \lot('pager', $pager);
+        \lot('pages', $pages);
         \State::set('has', [
             'next' => !!$pager->next,
             'parent' => !!$pager->parent,
@@ -98,7 +98,7 @@ function route__page($content, $path, $query, $hash) {
     if (null !== $content) {
         return $content;
     }
-    \extract($GLOBALS, \EXTR_SKIP);
+    \extract(\lot(), \EXTR_SKIP);
     $route = \trim($state->x->archive->route ?? 'archive', '/');
     // Return the route value to the native page route and move the archive route parameter to `name`
     if ($path && \preg_match('/^(.*?)\/' . \x($route) . '\/([^\/]+)\/([1-9]\d*)$/', $path, $m)) {
@@ -115,7 +115,7 @@ $archive = \array_pop($chops);
 $route = \array_pop($chops);
 
 // Initialize response variable(s)
-$GLOBALS['archive'] = null;
+\lot('archive', null);
 
 if (
     $archive &&
@@ -147,7 +147,7 @@ if (
     $/x', $archive)
 ) {
     $archive = \substr_replace('1970-01-01-00-00-00', $archive, 0, \strlen($archive));
-    $GLOBALS['archive'] = new \Time($archive);
+    \lot('archive', new \Time($archive));
     \Hook::set('route.archive', __NAMESPACE__ . "\\route__archive", 100);
     \Hook::set('route.page', __NAMESPACE__ . "\\route__page", 90);
 }
