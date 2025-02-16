@@ -132,17 +132,17 @@ $route = \array_pop($chops);
 if ($archive && $route === \trim($state->x->archive->route ?? 'archive', '/')) {
     $a = \explode('-', $archive);
     // Year
-    if (\count($a) < 7 && ($a[0] = (int) $a[0]) > 1969) {
+    if (\count($a) < 7 && ($n = (int) $a[0]) > 1969) {
         // Month
-        if (!isset($a[1]) || ($a[1] = (int) $a[1]) > 0 && $a[1] < 13) {
+        if (!isset($a[1]) || ($n = (int) $a[1]) > 0 && $n < 13) {
             // Day
-            if (!isset($a[2]) || ($a[2] = (int) $a[2]) > 0 && $a[2] < 32) {
+            if (!isset($a[2]) || ($n = (int) $a[2]) > 0 && $n < 32) {
                 // Hour
-                if (!isset($a[3]) || ($a[3] = (int) $a[3]) > 0 && $a[3] < 25) {
+                if (!isset($a[3]) || ($n = (int) $a[3]) > 0 && $n < 25) {
                     // Minute
-                    if (!isset($a[4]) || ($a[4] = (int) $a[4]) > 0 && $a[4] < 61) {
+                    if (!isset($a[4]) || ($n = (int) $a[4]) > 0 && $n < 61) {
                         // Second
-                        if (!isset($a[5]) || ($a[5] = (int) $a[5]) > 0 && $a[5] < 61) {
+                        if (!isset($a[5]) || ($n = (int) $a[5]) > 0 && $n < 61) {
                             $archive = \substr_replace('1970-01-01-00-00-00', $archive, 0, \strlen($archive));
                             \lot('archive', new \Time($archive));
                             \Hook::set('route.archive', __NAMESPACE__ . "\\route__archive", 100);
