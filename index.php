@@ -8,7 +8,7 @@ function route__archive($content, $path, $query, $hash) {
     $name = \State::get('[x].query.archive') ?? "";
     $path = \trim($path ?? "", '/');
     $route = \trim($state->x->archive->route ?? 'archive', '/');
-    if ($part = \x\page\n($path)) {
+    if ($part = \x\page\part($path)) {
         $path = \substr($path, 0, -\strlen('/' . $part));
     }
     $part = ((int) ($part ?? 0)) - 1;

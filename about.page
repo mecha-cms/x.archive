@@ -30,13 +30,13 @@ These HTML classes will be added to the root element if it contains a `class` at
 page. You can use this feature to create a specific look or response on your site from the client side if the following
 classes are found in the root element:
 
-`is:archives`
+`is-archives`
 : Will be added if the current items view is an archives view and is not empty.
 
 Example usage in CSS code:
 
 ~~~ .css
-.is\:archives body {
+.is-archives body {
   border-top: 4px solid #f00;
 }
 ~~~
@@ -44,7 +44,7 @@ Example usage in CSS code:
 Example usage in JS code:
 
 ~~~ .js
-if (document.documentElement.classList.contains('is:archives')) {
+if (document.documentElement.classList.contains('is-archives')) {
     console.info('You are currently in the archives page.');
 }
 ~~~
