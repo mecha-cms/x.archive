@@ -102,7 +102,7 @@ function route__page($content, $path, $query, $hash) {
         return $content;
     }
     \extract(\lot(), \EXTR_SKIP);
-    if (!$part = \x\page\n($path = \trim($path ?? "", '/'))) {
+    if (!$part = \x\page\part($path = \trim($path ?? "", '/'))) {
         return $content;
     }
     $path = \substr($path, 0, -\strlen('/' . $part));
