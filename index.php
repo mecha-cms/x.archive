@@ -1,152 +1,125 @@
-<?php namespace x\archive;
+<?php
 
-function route__archive($content, $path, $query, $hash) {
-    if (null !== $content) {
-        return $content;
+namespace {
+    // Disable this extension if `page` extension is disabled or removed ;)
+    if (!isset($state->x->page)) {
+        return;
     }
-    \extract(\lot(), \EXTR_SKIP);
-    $name = \State::get('[x].query.archive') ?? "";
-    $path = \trim($path ?? "", '/');
-    $route = \trim($state->x->archive->route ?? 'archive', '/');
-    if ($part = \x\page\part($path)) {
-        $path = \substr($path, 0, -\strlen('/' . $part));
-    }
-    $part = ((int) ($part ?? 0)) - 1;
-    $folder = \LOT . \D . 'page' . \D . $path;
-    if ($file = \exist([
-        $folder . '.archive',
-        $folder . '.page'
-    ], 1)) {
-        $page = new \Page($file);
-    }
-    $chunk = $page->chunk ?? 5;
-    $deep = $page->deep ?? 0;
-    $sort = [-1, 'time']; // Force page sort by the `time` data
-    if ($pages = $page->children('page', $deep)) {
-        $pages = $pages->sort($sort);
-    } else {
-        $pages = new \Pages;
-    }
-    \State::set([
-        'chunk' => $chunk,
-        'count' => $count = $pages->count, // Total number of page(s) before chunk
-        'deep' => $deep,
-        'part' => $part + 1,
-        'sort' => $sort
-    ]);
-    if ($count > 0) {
-        $pages = $pages->is(function ($v) use ($name) {
-            $time = $v->time . "";
-            return 0 === \strpos(\strtr($time, [
-                ':' => '-',
-                ' ' => '-'
-            ]) . '-', $name . '-');
-        });
-        $pager = \Pager::from($pages);
-        $pager->path = $path . '/' . $route . '/' . $name;
-        $pager = $pager->chunk($chunk, $part);
-        $pages = $pages->chunk($chunk, $part);
-        if (0 === ($count = $pages->count)) { // Total number of page(s) after chunk
-            // Greater than the maximum part or less than `1`, abort!
-            \State::set([
-                'has' => [
-                    'next' => false,
-                    'parent' => false,
-                    'prev' => false
-                ],
-                'is' => [
-                    'error' => 404,
-                    'page' => true,
-                    'pages' => false
-                ]
-            ]);
-            \lot('t')[] = \i('Error');
-            return ['page/archive/' . $name, [], 404];
-        }
-        \State::set([
-            'is' => [
-                'archive' => false, // Never be `true`
-                'archives' => true,
-                'error' => false,
-                'page' => false,
-                'pages' => true
-            ],
-            'has' => [
-                'page' => true,
-                'pages' => $count > 0,
-                'parent' => true
-            ]
-        ]);
-        \lot('t')[] = \i('Archive');
-        $a = \explode('-', $name);
-        if (!isset($a[1])) {
-            \lot('t')[] = $a[0];
-        } else {
-            \lot('t')[] = (new \Time($a[0] . '-' . $a[1] . '-01 00:00:00'))('%B %Y');
-        }
-        \lot('page', $page);
-        \lot('pager', $pager);
-        \lot('pages', $pages);
-        \State::set('has', [
-            'next' => !!$pager->next,
-            'parent' => !!$pager->parent,
-            'part' => $part >= 0,
-            'prev' => !!$pager->prev
-        ]);
-        return ['pages/archive/' . $name, [], 200];
-    }
+    // Initialize layout variable(s)
+    \lot('archive', new \Time);
 }
 
-function route__page($content, $path, $query, $hash) {
-    if (null !== $content) {
-        return $content;
-    }
-    \extract(\lot(), \EXTR_SKIP);
-    if (!$part = \x\page\part($path = \trim($path ?? "", '/'))) {
-        return $content;
-    }
-    $path = \substr($path, 0, -\strlen('/' . $part));
-    $route = \trim($state->x->archive->route ?? 'archive', '/');
-    // Return the route value to the native page route and move the archive route parameter to state
-    if ($path) {
-        $a = \explode('/', $path);
-        $name = \array_pop($a);
-        $r = \array_pop($a);
-        if ($r !== $route) {
+namespace x\archive {
+    function route__archive($content, $path, $query, $hash) {
+        if (null !== $content) {
             return $content;
         }
-        \State::set('[x].query.archive', $name);
-        return \Hook::fire('route.archive', [$content, \implode('/', $a) . '/' . $part, $query, $hash]);
+        \extract(\lot(), \EXTR_SKIP);
+        $route = \trim($state->x->archive->route ?? 'archive', '/');
+        if ($part = \x\page\part($path = \trim($path ?? "", '/'))) {
+            $path = \substr($path, 0, -\strlen('/' . $part));
+        }
+        $part = ($part ?? 0) - 1;
+        // For `/…/archive/:name/:part`
+        if ($part >= 0 && $path) {
+            $folder = \LOT . \D . 'page' . \D . $path;
+            if ($file = \exist([
+                $folder . '.archive',
+                $folder . '.page'
+            ], 1)) {
+                if ($name = \State::get('[x].query.archive') ?? "") {
+                    \lot('page', $page = new \Page($file));
+                    $chunk = $archive->chunk ?? $page->chunk ?? 5;
+                    $sort = \array_replace([-1, 'time'], (array) ($page->sort ?? []), (array) ($archive->sort ?? []));
+                    if ($pages = $page->children('page', 0)) {
+                        $pages = $pages->is(function ($v) use ($name) {
+                            return 0 === \strpos(\strtr($v->time . '-', [
+                                ' ' => '-',
+                                ':' => '-'
+                            ]), $name . '-');
+                        })->sort($sort);
+                    } else {
+                        $pages = new \Pages;
+                    }
+                    \lot('t')[] = $page->title;
+                    \lot('t')[] = \i('Archive');
+                    $a = \explode('-', $name);
+                    if (isset($a[1])) {
+                        \lot('t')[] = (new \Time($a[0] . '-' . $a[1] . '-01 00:00:00'))('%B %Y');
+                    } else {
+                        \lot('t')[] = $a[0];
+                    }
+                    $pager = \Pager::from($pages);
+                    $pager->path = $path . '/' . $route . '/' . $name;
+                    \lot('pager', $pager = $pager->chunk($chunk, $part));
+                    \lot('pages', $pages = $pages->chunk($chunk, $part));
+                    if (0 === ($count = \q($pages))) {
+                        \lot('t')[] = \i('Error');
+                    }
+                    \State::set([
+                        'has' => [
+                            'next' => !!$pager->next,
+                            'parent' => !!$page->parent,
+                            'prev' => !!$pager->prev
+                        ],
+                        'is' => ['error' => 0 === $count ? 404 : false],
+                        'with' => ['pages' => $count > 0]
+                    ]);
+                    return ['pages/archive/' . $name, [], 0 === $count ? 404 : 200];
+                }
+            }
+        }
     }
-    return $content;
-}
-
-$chops = \explode('/', $url->path ?? "");
-$part = \array_pop($chops);
-$archive = \array_pop($chops);
-$route = \array_pop($chops);
-
-// Initialize response variable(s)
-\lot('archive', new \Time);
-
-if ($archive && $route === \trim($state->x->archive->route ?? 'archive', '/')) {
-    $a = \explode('-', $archive);
-    // Year
-    if (\count($a) < 7 && ($n = (int) $a[0]) > 1969) {
-        // Month
-        if (!isset($a[1]) || ($n = (int) $a[1]) > 0 && $n < 13) {
-            // Day
-            if (!isset($a[2]) || ($n = (int) $a[2]) > 0 && $n < 32) {
-                // Hour
-                if (!isset($a[3]) || ($n = (int) $a[3]) > 0 && $n < 25) {
-                    // Minute
-                    if (!isset($a[4]) || ($n = (int) $a[4]) > 0 && $n < 61) {
-                        // Second
-                        if (!isset($a[5]) || ($n = (int) $a[5]) > 0 && $n < 61) {
-                            $archive = \substr_replace('1970-01-01-00-00-00', $archive, 0, \strlen($archive));
-                            \lot('archive', new \Time($archive));
-                            \Hook::set('route.archive', __NAMESPACE__ . "\\route__archive", 100);
-                            \Hook::set('route.page', __NAMESPACE__ . "\\route__page", 90);
+    function route__page($content, $path, $query, $hash) {
+        if (null !== $content) {
+            return $content;
+        }
+        \extract(\lot(), \EXTR_SKIP);
+        $route = \trim($state->x->archive->route ?? 'archive', '/');
+        if ($part = \x\page\part($path = \trim($path ?? "", '/'))) {
+            $path = \substr($path, 0, -\strlen('/' . $part));
+            $path = \dirname($path); // Remove the name (time) part
+            if ($route !== \basename($path)) {
+                return $content;
+            }
+            return \Hook::fire('route.archive', [$content, \dirname($path) . '/' . $part, $query, $hash]);
+        }
+        return $content;
+    }
+    // Cannot use function `x\page\part()` here because it is not yet defined :(
+    // if ($part = \x\page\part($path = \trim($url->path ?? "", '/'))) {
+    //     $path = \substr($path, 0, -\strlen('/' . $part));
+    // }
+    $path = \trim($url->path ?? "", '/');
+    $part = \trim(\strrchr($path, '/') ?: $path, '/');
+    if ("" !== $part && '0' !== $part[0] && \strspn($part, '0123456789') === \strlen($part) && ($part = (int) $part) > 0) {
+        $path = \substr($path, 0, -\strlen('/' . $part));
+    } else {
+        unset($part);
+    }
+    $part = ($part ?? 0) - 1;
+    $route = \trim($state->x->archive->route ?? 'archive', '/');
+    // For `/…/archive/:name/:part`
+    if ($part >= 0 && $route === \basename(\dirname($path))) {
+        $a = \explode('-', $name = \basename($path));
+        // Year
+        if (\count($a) < 7 && ($n = (int) $a[0]) > 1969) {
+            // Month
+            if (!isset($a[1]) || ($n = (int) $a[1]) > 0 && $n < 13) {
+                // Day
+                if (!isset($a[2]) || ($n = (int) $a[2]) > 0 && $n < 32) {
+                    // Hour
+                    if (!isset($a[3]) || ($n = (int) $a[3]) > 0 && $n < 25) {
+                        // Minute
+                        if (!isset($a[4]) || ($n = (int) $a[4]) > 0 && $n < 61) {
+                            // Second
+                            if (!isset($a[5]) || ($n = (int) $a[5]) > 0 && $n < 61) {
+                                \Hook::set('route.archive', __NAMESPACE__ . "\\route__archive", 100);
+                                \Hook::set('route.page', __NAMESPACE__ . "\\route__page", 90);
+                                \State::set('[x].query.archive', $name);
+                                \State::set('is.archives', true);
+                                \lot('archive', new \Time(\substr_replace('1970-01-01-00-00-00', $name, 0, \strlen($name))));
+                            }
                         }
                     }
                 }

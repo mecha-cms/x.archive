@@ -9,19 +9,19 @@ version: 2.1.0
 ...
 
 This extension enables the time filter feature by using the page’s `time` property to add multiple routes, such as
-`http://127.0.0.1/blog/archive/:archive/1`, to each page to allow users to list all pages in the current folder by time.
+`http://127.0.0.1/article/archive/:name/1`, to each page to allow users to list all pages in the current folder by time.
 
 As a note, every time you want to link a page to a specific year-based archive, be sure to add the pagination offset to
 the end of the URL to prevent Mecha from misinterpreting the archive query as a pagination offset or individual page
 name:
 
 ~~~ .txt
-http://127.0.0.1/blog/archive/2020 ✘
-http://127.0.0.1/blog/archive/2020/1 ✔
-http://127.0.0.1/blog/archive/2020-09 ✘
-http://127.0.0.1/blog/archive/2020-09/1 ✔
-http://127.0.0.1/blog/archive/2020-09-18 ✘
-http://127.0.0.1/blog/archive/2020-09-18/1 ✔
+http://127.0.0.1/article/archive/2020 ✘
+http://127.0.0.1/article/archive/2020/1 ✔
+http://127.0.0.1/article/archive/2020-09 ✘
+http://127.0.0.1/article/archive/2020-09/1 ✔
+http://127.0.0.1/article/archive/2020-09-18 ✘
+http://127.0.0.1/article/archive/2020-09-18/1 ✔
 ~~~
 
 ### Usage
@@ -31,7 +31,7 @@ page. You can use this feature to create a specific look or response on your sit
 classes are found in the root element:
 
 `is-archives`
-: Will be added if the current items view is an archives view and is not empty.
+: Will be added if the current items view is an archives view.
 
 Example usage in CSS code:
 
@@ -53,7 +53,7 @@ These additional conditional statements are available for use in layouts to show
 server side:
 
 `$site->is('archives')`
-: Returns `true` if the current items view is an archives view and is not empty.
+: Returns `true` if the current items view is an archives view.
 
 Example usage in HTML/PHP code:
 
@@ -69,7 +69,7 @@ These additional variables are available for use in layouts that carry data rela
 page:
 
 `$archive`
-: This variable is an instance of the `Time` class, which you can use to get the archive time portion of the URL.
+: This variable is an instance of the `Time` class, which you can use to get the current archive information.
 
 Example usage in HTML/PHP code:
 

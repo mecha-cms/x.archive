@@ -1,3 +1,10 @@
 <?php
 
-return ['route' => '/archive'];
+return [
+    // Pre-defined page data
+    'page' => [
+        'chunk' => 5,
+        'sort' => [-1, 'time']
+    ],
+    'route' => '/archive'
+];
