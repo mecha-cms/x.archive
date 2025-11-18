@@ -27,7 +27,7 @@ namespace x\archive {
                 $folder . '.archive',
                 $folder . '.page'
             ], 1)) {
-                if ($name = \State::get('[x].query.archive') ?? "") {
+                if ($name = $state->q->archive ?? "") {
                     \lot('page', $page = new \Page($file));
                     $chunk = $archive->chunk ?? $page->chunk ?? 5;
                     $sort = \array_replace([-1, 'time'], (array) ($page->sort ?? []), (array) ($archive->sort ?? []));
@@ -116,8 +116,8 @@ namespace x\archive {
                             if (!isset($a[5]) || ($n = (int) $a[5]) > 0 && $n < 61) {
                                 \Hook::set('route.archive', __NAMESPACE__ . "\\route__archive", 100);
                                 \Hook::set('route.page', __NAMESPACE__ . "\\route__page", 90);
-                                \State::set('[x].query.archive', $name);
                                 \State::set('is.archives', true);
+                                \State::set('q.archive', $name);
                                 \lot('archive', new \Time(\substr_replace('1970-01-01-00-00-00', $name, 0, \strlen($name))));
                             }
                         }
