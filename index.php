@@ -27,7 +27,7 @@ namespace x\archive {
                 $folder . '.archive',
                 $folder . '.page'
             ], 1)) {
-                if ($name = $state->q->archive ?? "") {
+                if ($name = $state->q('archive.name')) {
                     \lot('page', $page = new \Page($file));
                     $chunk = $archive->chunk ?? $page->chunk ?? 5;
                     $sort = \array_replace([-1, 'time'], (array) ($page->sort ?? []), (array) ($archive->sort ?? []));
@@ -86,16 +86,8 @@ namespace x\archive {
         }
         return $content;
     }
-    // Cannot use function `x\page\part()` here because it is not yet defined :(
-    // if ($part = \x\page\part($path = \trim($url->path ?? "", '/'))) {
-    //     $path = \substr($path, 0, -\strlen('/' . $part));
-    // }
-    $path = \trim($url->path ?? "", '/');
-    $part = \trim(\strrchr($path, '/') ?: $path, '/');
-    if ("" !== $part && '0' !== $part[0] && \strspn($part, '0123456789') === \strlen($part) && ($part = (int) $part) > 0) {
+    if ($part = \x\page\part($path = \trim($url->path ?? "", '/'))) {
         $path = \substr($path, 0, -\strlen('/' . $part));
-    } else {
-        unset($part);
     }
     $part = ($part ?? 0) - 1;
     $route = \trim($state->x->archive->route ?? 'archive', '/');
@@ -114,11 +106,18 @@ namespace x\archive {
                         if (!isset($a[4]) || ($n = (int) $a[4]) > 0 && $n < 61) {
                             // Second
                             if (!isset($a[5]) || ($n = (int) $a[5]) > 0 && $n < 61) {
+                                \lot('archive', new \Time(\substr_replace('1970-01-01-00-00-00', $name, 0, \strlen($name))));
                                 \Hook::set('route.archive', __NAMESPACE__ . "\\route__archive", 100);
                                 \Hook::set('route.page', __NAMESPACE__ . "\\route__page", 90);
-                                \State::set('is.archives', true);
-                                \State::set('q.archive', $name);
-                                \lot('archive', new \Time(\substr_replace('1970-01-01-00-00-00', $name, 0, \strlen($name))));
+                                \State::set([
+                                    'is' => ['archives' => true],
+                                    'q' => [
+                                        'archive' => [
+                                            'name' => $name,
+                                            'part' => $part + 1
+                                        ]
+                                    ]
+                                ]);
                             }
                         }
                     }
