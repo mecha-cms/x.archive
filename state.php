@@ -2,7 +2,7 @@
 
 return [
     // Pre-defined page data
-    'page' => [
+    'lot' => [
         'chunk' => 5,
         'sort' => [-1, 'time']
     ],

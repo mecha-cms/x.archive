@@ -22,16 +22,12 @@ namespace x\archive {
         $part = ($part ?? 0) - 1;
         // For `/…/archive/:name/:part`
         if ($part >= 0 && $path) {
-            $folder = \LOT . \D . 'page' . \D . $path;
-            if ($file = \exist([
-                $folder . '.archive',
-                $folder . '.page'
-            ], 1)) {
+            if ($file = \exist(\LOT . \D . 'page' . \D . $path . '.{' . ($x = \x\page\x()) . '}', 1)) {
                 if ($name = $state->q('archive.name')) {
                     \lot('page', $page = new \Page($file));
-                    $chunk = $archive->chunk ?? $page->chunk ?? 5;
-                    $sort = \array_replace([-1, 'time'], (array) ($page->sort ?? []), (array) ($archive->sort ?? []));
-                    if ($pages = $page->children('page', 0)) {
+                    $chunk = $state->x->archive->lot->chunk ?? $page->chunk ?? 5;
+                    $sort = \array_replace([-1, 'time'], (array) ($page->sort ?? []), (array) ($state->x->archive->lot->sort ?? []));
+                    if ($pages = $page->children($x, 0)) {
                         $pages = $pages->is(function ($v) use ($name) {
                             return 0 === \strpos(\strtr($v->time . '-', [
                                 ' ' => '-',
