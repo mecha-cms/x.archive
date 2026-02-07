@@ -61,7 +61,11 @@ namespace x\archive {
                         'is' => ['error' => 0 === $count ? 404 : false],
                         'with' => ['pages' => $count > 0]
                     ]);
-                    return ['pages/archive/' . $name, [], 0 === $count ? 404 : 200];
+                    return [
+                        'lot' => [],
+                        'status' => 0 === $count ? 404 : 200,
+                        'y' => 'pages/archive/' . $name
+                    ];
                 }
             }
         }
