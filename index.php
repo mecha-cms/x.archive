@@ -22,7 +22,7 @@ namespace x\archive {
         $part = ($part ?? 0) - 1;
         // For `/…/archive/:name/:part`
         if ($part >= 0 && $path) {
-            if ($file = \exist(\LOT . \D . 'page' . \D . $path . '.{' . ($x = \x\page\x()) . '}', 1)) {
+            if ($file = \exist(\LOT . \D . 'page' . \D . \rawurldecode($path) . '.{' . ($x = \x\page\x()) . '}', 1)) {
                 if ($name = $state->q('archive.name')) {
                     \lot('page', $page = new \Page($file));
                     $chunk = $state->x->archive->lot->chunk ?? $page->chunk ?? 5;
