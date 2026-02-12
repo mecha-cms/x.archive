@@ -92,7 +92,7 @@ namespace x\archive {
     $part = ($part ?? 0) - 1;
     $route = \trim($state->x->archive->route ?? 'archive', '/');
     // For `/…/archive/:name/:part`
-    if ($part >= 0 && $route === \basename(\dirname($path))) {
+    if ($part >= 0 && $route === \basename(\dirname($path = \rawurldecode($path)))) {
         $a = \explode('-', $name = \basename($path));
         // Year
         if (\count($a) < 7 && ($n = (int) $a[0]) > 1969) {
