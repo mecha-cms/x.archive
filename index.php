@@ -19,9 +19,9 @@ namespace x\archive {
         if ($part = \x\page\part($path = \trim($path ?? "", '/'))) {
             $path = \substr($path, 0, -\strlen('/' . $part));
         }
-        $part = ($part ?? 0) - 1;
+        $at = ($part ?? 0) - 1;
         // For `/…/archive/:name/:part`
-        if ($part >= 0 && $path) {
+        if ($at >= 0 && $path) {
             if ($file = \exist(\LOT . \D . 'page' . \D . \rawurldecode($path) . '.{' . ($x = \x\page\x()) . '}', 1)) {
                 if ($name = $state->q('archive.name')) {
                     \lot('page', $page = new \Page($file));
@@ -47,8 +47,8 @@ namespace x\archive {
                     }
                     $pager = \Pager::from($pages);
                     $pager->path = $path . '/' . $route . '/' . $name;
-                    \lot('pager', $pager = $pager->chunk($chunk, $part));
-                    \lot('pages', $pages = $pages->chunk($chunk, $part));
+                    \lot('pager', $pager = $pager->chunk($chunk, $at));
+                    \lot('pages', $pages = $pages->chunk($chunk, $at));
                     if (0 === ($count = \q($pages))) {
                         \lot('t')[] = \i('Error');
                     }
@@ -89,10 +89,10 @@ namespace x\archive {
     if ($part = \x\page\part($path = \trim($link->path ?? "", '/'))) {
         $path = \substr($path, 0, -\strlen('/' . $part));
     }
-    $part = ($part ?? 0) - 1;
+    $at = ($part ?? 0) - 1;
     $route = \trim($state->x->archive->route ?? 'archive', '/');
     // For `/…/archive/:name/:part`
-    if ($part >= 0 && $route === \basename(\dirname($path = \rawurldecode($path)))) {
+    if ($at >= 0 && $route === \basename(\dirname($path = \rawurldecode($path)))) {
         $a = \explode('-', $name = \basename($path));
         // Year
         if (\count($a) < 7 && ($n = (int) $a[0]) > 1969) {
@@ -114,7 +114,7 @@ namespace x\archive {
                                     'q' => [
                                         'archive' => [
                                             'name' => $name,
-                                            'part' => $part + 1
+                                            'part' => $part
                                         ]
                                     ]
                                 ]);
