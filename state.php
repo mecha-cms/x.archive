@@ -6,5 +6,5 @@ return [
         'chunk' => 5,
         'sort' => [-1, 'time']
     ],
-    'route' => '/archive'
+    'sub' => '/archive'
 ];

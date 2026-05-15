@@ -15,7 +15,7 @@ namespace x\archive {
             return $content;
         }
         \extract(\lot(), \EXTR_SKIP);
-        $route = \trim($state->x->archive->route ?? 'archive', '/');
+        $sub = \trim($state->x->archive->sub ?? 'archive', '/');
         if ($part = \x\page\part($path = \trim($path ?? "", '/'))) {
             $path = \substr($path, 0, -\strlen('/' . $part));
         }
@@ -46,7 +46,7 @@ namespace x\archive {
                         \lot('t')[] = $a[0];
                     }
                     $pager = \Pager::from($pages);
-                    $pager->path = $path . '/' . $route . '/' . $name;
+                    $pager->path = $path . '/' . $sub . '/' . $name;
                     \lot('pager', $pager = $pager->chunk($chunk, $at));
                     \lot('pages', $pages = $pages->chunk($chunk, $at));
                     if (0 === ($count = \q($pages))) {
@@ -75,11 +75,11 @@ namespace x\archive {
             return $content;
         }
         \extract(\lot(), \EXTR_SKIP);
-        $route = \trim($state->x->archive->route ?? 'archive', '/');
+        $sub = \trim($state->x->archive->sub ?? 'archive', '/');
         if ($part = \x\page\part($path = \trim($path ?? "", '/'))) {
             $path = \substr($path, 0, -\strlen('/' . $part));
             $path = \dirname($path); // Remove the name (time) part
-            if ($route !== \basename($path)) {
+            if ($sub !== \basename($path)) {
                 return $content;
             }
             return \Hook::fire('route.archive', [$content, \dirname($path) . '/' . $part, $query, $hash]);
@@ -90,9 +90,9 @@ namespace x\archive {
         $path = \substr($path, 0, -\strlen('/' . $part));
     }
     $at = ($part ?? 0) - 1;
-    $route = \trim($state->x->archive->route ?? 'archive', '/');
+    $sub = \trim($state->x->archive->sub ?? 'archive', '/');
     // For `/…/archive/:name/:part`
-    if ($at >= 0 && $route === \basename(\dirname($path = \rawurldecode($path)))) {
+    if ($at >= 0 && $sub === \basename(\dirname($path = \rawurldecode($path)))) {
         $a = \explode('-', $name = \basename($path));
         // Year
         if (\count($a) < 7 && ($n = (int) $a[0]) > 1969) {
